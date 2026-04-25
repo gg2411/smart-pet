@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawSense — Smart Health Monitoring for Dogs</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- NAV -->
+    <nav class="nav" id="topNav">
+      <div class="nav-left">
+        <div class="nav-logo">
+          <span class="logo-paw">🐾</span>
+          <span class="logo-text">PawSense</span>
+        </div>
+      </div>
+      <div class="nav-center">
+        <div class="nav-tabs">
+          <button class="nav-tab active" data-view="dashboard">Dashboard</button>
+          <button class="nav-tab" data-view="timeline">Timeline</button>
+          <button class="nav-tab" data-view="insights">Insights</button>
+          <button class="nav-tab" data-view="vet">Vet Report</button>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="dog-switcher">
+          <div class="dog-avatar" id="navAvatar">🐕</div>
+          <div class="dog-info">
+            <div class="dog-name" id="navDogName">Mochi</div>
+            <div class="dog-breed" id="navDogBreed">Golden Retriever · 4 yrs</div>
+          </div>
+          <div class="alert-badge" id="alertBadge" style="display:none">⚠ Alert</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- VIEWS -->
+    <main class="main-content">
+
+      <!-- DASHBOARD VIEW -->
+      <div class="view active" id="view-dashboard">
+        <!-- ALERT BANNER -->
+        <div class="alert-banner" id="alertBanner" style="display:none">
+          <div class="alert-inner">
+            <div class="alert-icon-wrap">🚨</div>
+            <div class="alert-text">
+              <div class="alert-title" id="alertTitle">Elevated Heart Rate Detected</div>
+              <div class="alert-desc" id="alertDesc">Mochi's resting heart rate has been 30% above baseline for 2+ hours. This may indicate early illness.</div>
+            </div>
+            <div class="alert-cta">
+              <button class="btn-alert" onclick="switchView('vet')">View Vet Report →</button>
+              <button class="btn-dismiss" id="dismissAlert">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO SCORE -->
+        <section class="hero-section">
+          <div class="hero-score-wrap">
+            <svg class="score-ring" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="70" cy="70" r="56" fill="none" stroke="#F0EDE8" stroke-width="12"/>
+              <circle id="scoreCircle" cx="70" cy="70" r="56" fill="none"
+                stroke="#3B9E5A" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="351.9" stroke-dashoffset="70.4"
+                transform="rotate(-90 70 70)"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-number" id="scoreNumber">80</div>
+              <div class="score-word" id="scoreWord">Great</div>
+            </div>
+          </div>
+
+          <div class="hero-info">
+            <div class="hero-greeting" id="heroGreeting">Mochi is doing great today! 🎉</div>
+            <div class="hero-subtitle" id="heroSubtitle">All vitals within normal range · Last synced 3 min ago</div>
+
+            <div class="vitals-grid">
+              <div class="vital-item" id="vital-hr">
+                <div class="vital-icon">❤️</div>
+                <div class="vital-data">
+                  <div class="vital-val" id="vitalHR">88 bpm</div>
+                  <div class="vital-label">Heart Rate</div>
+                  <div class="vital-status ok" id="statusHR">Normal</div>
+                </div>
+              </div>
+              <div class="vital-item" id="vital-temp">
+                <div class="vital-icon">🌡️</div>
+                <div class="vital-data">
+                  <div class="vital-val" id="vitalTemp">38.5°C</div>
+                  <div class="vital-label">Temperature</div>
+                  <div class="vital-status ok" id="statusTemp">Normal</div>
+                </div>
+              </div>
+              <div class="vital-item" id="vital-act">
+                <div class="vital-icon">⚡</div>
+                <div class="vital-data">
+                  <div class="vital-val" id="vitalAct">6,240 steps</div>
+                  <div class="vital-label">Activity</div>
+                  <div class="vital-status ok" id="statusAct">Active</div>
+                </div>
+              </div>
+              <div class="vital-item" id="vital-sleep">
+                <div class="vital-icon">😴</div>
+                <div class="vital-data">
+                  <div class="vital-val" id="vitalSleep">7.2 hrs</div>
+                  <div class="vital-label">Sleep</div>
+                  <div class="vital-status ok" id="statusSleep">Good</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SCENARIO DEMO SWITCHER -->
+            <div class="demo-switcher">
+              <span class="demo-label">Demo scenario:</span>
+              <div class="demo-btns">
+                <button class="demo-btn active" data-scenario="healthy">Healthy Day</button>
+                <button class="demo-btn" data-scenario="mild">Mild Concern</button>
+                <button class="demo-btn" data-scenario="critical">Critical Alert</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHARTS ROW -->
+        <section class="charts-section">
+          <div class="chart-card wide">
+            <div class="chart-header">
+              <div class="chart-title">Heart Rate · 7-Day Trend</div>
+              <div class="chart-legend">
+                <span class="legend-dot" style="background:#3B9E5A"></span> Mochi
+                <span class="legend-dot" style="background:#ccc; margin-left:12px"></span> Baseline (88 bpm)
+              </div>
+            </div>
+            <div class="canvas-wrap" style="height:180px">
+              <canvas id="hrTrendChart" role="img" aria-label="Heart rate over 7 days with anomaly spike on day 5"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">Activity Score</div>
+            </div>
+            <div class="canvas-wrap" style="height:180px">
+              <canvas id="actChart" role="img" aria-label="Daily activity scores over 7 days"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">Sleep Quality</div>
+            </div>
+            <div class="canvas-wrap" style="height:180px">
+              <canvas id="sleepChart" role="img" aria-label="Sleep quality scores over 7 days"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- TODAY'S LOG -->
+        <section class="log-section">
+          <h2 class="section-title">Today's Log</h2>
+          <div class="log-list" id="todayLog"></div>
+        </section>
+      </div>
+
+      <!-- TIMELINE VIEW -->
+      <div class="view" id="view-timeline">
+        <div class="view-header">
+          <h1 class="view-title">Health Timeline</h1>
+          <p class="view-desc">Complete history of Mochi's health events over the past 30 days</p>
+        </div>
+        <div class="timeline-container" id="fullTimeline"></div>
+      </div>
+
+      <!-- INSIGHTS VIEW -->
+      <div class="view" id="view-insights">
+        <div class="view-header">
+          <h1 class="view-title">AI Health Insights</h1>
+          <p class="view-desc">Patterns and predictions based on Mochi's biometric data</p>
+        </div>
+        <div class="insights-grid" id="insightsGrid"></div>
+      </div>
+
+      <!-- VET REPORT VIEW -->
+      <div class="view" id="view-vet">
+        <div class="view-header">
+          <h1 class="view-title">Vet Report</h1>
+          <p class="view-desc">AI-generated summary ready to share with your veterinarian</p>
+        </div>
+        <div class="vet-report" id="vetReport"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="src/data.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
