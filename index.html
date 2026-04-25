@@ -1,203 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PawSense — Smart Health Monitoring for Dogs</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="src/styles.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PawSense — Smart Health Monitoring for Dogs</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FDFAF5;--cream2:#F5F0E8;--cream3:#EDE5D8;
+  --ink:#1C1917;--ink2:#44403C;--ink3:#78716C;--ink4:#A8A29E;
+  --green:#2D7D52;--green-bg:#EDF6F0;--green-mid:#4CAF7D;
+  --amber:#C17D27;--amber-bg:#FEF6E7;--amber-mid:#E8A020;
+  --red:#C0392B;--red-bg:#FEF2F1;--red-mid:#E24B4A;
+  --blue:#1A6FA8;--blue-bg:#EFF6FF;
+  --border:rgba(28,25,23,0.10);--border2:rgba(28,25,23,0.16);
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.05);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.10);
+  --r:12px;--r-lg:18px;--r-xl:24px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);font-size:15px;line-height:1.6;min-height:100vh}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:200;background:rgba(253,250,245,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:58px;display:flex;align-items:center;padding:0 24px;gap:16px}
+.nav-logo{display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;background:var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-logo-text{font-family:'Fraunces',serif;font-size:20px;color:var(--ink);letter-spacing:-0.02em}
+.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center}
+.nav-tab{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:6px 14px;border-radius:8px;border:none;background:transparent;color:var(--ink3);cursor:pointer;transition:all .15s}
+.nav-tab:hover{background:var(--cream2);color:var(--ink)}
+.nav-tab.active{background:var(--ink);color:#fff}
+.nav-dog{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F5C84A,#E8911A);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.nav-dog-name{font-size:13px;font-weight:600;line-height:1.2}
+.nav-dog-breed{font-size:11px;color:var(--ink3)}
+.alert-pill{background:var(--red-mid);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;animation:pulse 2s infinite;display:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+
+/* LAYOUT */
+.main{max-width:1100px;margin:0 auto;padding:28px 24px 80px}
+.view{display:none;animation:fadeUp .3s ease}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.view-head{margin-bottom:28px}
+.view-title{font-family:'Fraunces',serif;font-size:34px;letter-spacing:-0.02em;margin-bottom:6px}
+.view-desc{color:var(--ink3);font-size:14px}
+
+/* ALERT BANNER */
+.alert-banner{border-radius:var(--r-lg);padding:16px 20px;margin-bottom:22px;display:none;animation:slideIn .35s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.alert-banner.danger{background:var(--red-bg);border:1.5px solid var(--red-mid)}
+.alert-banner.warning{background:var(--amber-bg);border:1.5px solid var(--amber-mid)}
+.alert-inner{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.alert-icon{font-size:22px;flex-shrink:0}
+.alert-text{flex:1;min-width:180px}
+.alert-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.alert-title.danger{color:var(--red)}
+.alert-title.warning{color:var(--amber)}
+.alert-desc{font-size:13px;color:var(--ink2);line-height:1.5}
+.alert-cta{display:flex;gap:8px;flex-shrink:0}
+.btn{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:var(--r);border:none;cursor:pointer;transition:opacity .15s}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{opacity:.85}
+.btn-outline{background:transparent;border:1.5px solid currentColor;color:var(--red)}
+.btn-outline:hover{background:rgba(224,75,74,.08)}
+.btn-outline.amber{color:var(--amber)}
+.btn-outline.amber:hover{background:rgba(200,130,40,.08)}
+
+/* DASHBOARD HERO */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start;background:#fff;border:1px solid var(--border);border-radius:var(--r-xl);padding:28px;margin-bottom:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-30px;bottom:-30px;width:160px;height:160px;background:radial-gradient(circle,var(--amber-bg),transparent 70%);pointer-events:none;z-index:0}
+.score-wrap{position:relative;width:130px;height:130px;flex-shrink:0;z-index:1}
+.score-svg{width:130px;height:130px;display:block}
+.score-svg circle:last-child{transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .8s}
+.score-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-num{font-family:'Fraunces',serif;font-size:36px;line-height:1;transition:color .8s}
+.score-word{font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+.hero-body{z-index:1}
+.hero-greeting{font-family:'Fraunces',serif;font-size:24px;letter-spacing:-.02em;margin-bottom:4px;line-height:1.2}
+.hero-sub{font-size:13px;color:var(--ink3);margin-bottom:20px}
+.vitals{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.vital{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--cream);transition:border-color .3s,background .3s}
+.vital.warning{border-color:var(--amber-mid);background:var(--amber-bg)}
+.vital.danger{border-color:var(--red-mid);background:var(--red-bg)}
+.vital-ico{font-size:20px;flex-shrink:0}
+.vital-val{font-size:15px;font-weight:700;line-height:1.1}
+.vital-name{font-size:11px;color:var(--ink3);margin-top:1px}
+.vital-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:3px;display:inline-block}
+.badge-ok{background:var(--green-bg);color:var(--green)}
+.badge-warn{background:var(--amber-bg);color:var(--amber)}
+.badge-danger{background:var(--red-bg);color:var(--red)}
+.demo-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.demo-label{font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.demo-btns{display:flex;gap:6px}
+.demo-btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--r);border:1.5px solid var(--border2);background:#fff;color:var(--ink);cursor:pointer;transition:all .15s}
+.demo-btn:hover{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber)}
+.demo-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1.65fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow)}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.chart-title{font-size:13px;font-weight:700;color:var(--ink)}
+.chart-legend{font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:4px}
+.leg-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.canvas-wrap{position:relative}
+canvas{display:block}
+
+/* LOG */
+.section-title{font-family:'Fraunces',serif;font-size:22px;letter-spacing:-.02em;margin-bottom:14px}
+.log-list{display:flex;flex-direction:column;gap:0}
+.log-item{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:#fff;border:1px solid var(--border);border-bottom:none;transition:background .15s}
+.log-item:first-child{border-radius:var(--r-lg) var(--r-lg) 0 0}
+.log-item:last-child{border-bottom:1px solid var(--border);border-radius:0 0 var(--r-lg) var(--r-lg)}
+.log-item:only-child{border-radius:var(--r-lg);border-bottom:1px solid var(--border)}
+.log-item:hover{background:var(--cream)}
+.log-dot-col{display:flex;flex-direction:column;align-items:center;gap:0;padding-top:4px;flex-shrink:0}
+.log-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.log-line{width:2px;flex:1;background:var(--cream3);min-height:18px;margin-top:3px}
+.log-text{flex:1}
+.log-event{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.log-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.03em}
+.log-detail{font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.5}
+.log-time{font-size:11px;color:var(--ink4);white-space:nowrap;padding-top:3px;flex-shrink:0}
+
+/* TIMELINE */
+.tl-day{margin-bottom:32px}
+.tl-day-head{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:19px;letter-spacing:-.02em;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.tl-day-badge{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--cream2);color:var(--ink3)}
+.tl-day-badge.alert{background:var(--red-bg);color:var(--red)}
+.tl-events{display:flex;flex-direction:column;gap:6px}
+.tl-event{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;border-radius:var(--r);border:1px solid var(--border);background:#fff;transition:transform .15s;cursor:default;border-left:3px solid transparent}
+.tl-event:hover{transform:translateX(3px)}
+.tl-event.featured{border:1.5px solid var(--red-mid);background:var(--red-bg);border-left:4px solid var(--red-mid);padding:16px 18px}
+.tl-event.alert{border-left-color:var(--red-mid);background:#fff9f9}
+.tl-event.warning{border-left-color:var(--amber-mid);background:#fffbf0}
+.tl-event.ok{border-left-color:var(--green-mid)}
+.tl-event.info{border-left-color:var(--blue)}
+.tl-event.resolved{border-left-color:var(--green-mid);background:var(--green-bg)}
+.tl-ico{font-size:18px;flex-shrink:0;margin-top:1px}
+.tl-body{flex:1}
+.tl-etitle{font-size:14px;font-weight:700}
+.tl-event.featured .tl-etitle{font-size:15px;color:var(--red)}
+.tl-edesc{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.55}
+.tl-meta{font-size:11px;color:var(--ink3);margin-top:4px;font-style:italic}
+.tl-time{font-size:12px;color:var(--ink3);white-space:nowrap;padding-top:2px;flex-shrink:0}
+
+/* INSIGHTS */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.insight-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:0}
+.insight-card.urgent{border-color:var(--red-mid);border-width:1.5px}
+.ins-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.ins-emoji{font-size:28px;flex-shrink:0;margin-top:1px}
+.ins-title{font-size:16px;font-weight:700;margin-bottom:2px}
+.ins-sub{font-size:12px;color:var(--ink3)}
+.ins-body{font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:14px}
+.ins-metric{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.ins-metric:last-of-type{border-bottom:none;margin-bottom:14px}
+.ins-mname{color:var(--ink3)}
+.ins-mval{font-weight:700}
+.ins-mval.up{color:var(--red)}
+.ins-mval.ok{color:var(--green)}
+.ins-mval.warn{color:var(--amber)}
+.ins-action{margin-top:auto;width:100%;padding:10px;border-radius:var(--r);border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.ins-action.primary{background:var(--ink);color:#fff}
+.ins-action.primary:hover{opacity:.85}
+.ins-action.secondary{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.ins-action.secondary:hover{background:var(--green-bg)}
+
+/* VET REPORT */
+.vet-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lg)}
+.vet-top{background:var(--ink);color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.vet-top-title{font-family:'Fraunces',serif;font-size:28px;letter-spacing:-.02em;margin-bottom:4px}
+.vet-top-sub{font-size:13px;opacity:.6}
+.vet-top-right{text-align:right}
+.vet-top-date{font-size:12px;opacity:.55;margin-bottom:8px}
+.vet-urgency-pill{background:var(--red-mid);color:#fff;font-size:11px;font-weight:800;padding:5px 14px;border-radius:99px;text-transform:uppercase;letter-spacing:.05em;display:inline-block}
+.vet-body{padding:28px 32px;display:flex;flex-direction:column;gap:0}
+.vet-sec{padding-bottom:24px;margin-bottom:24px;border-bottom:1px solid var(--border)}
+.vet-sec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.vet-sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:14px}
+.vet-vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.vet-vital{background:var(--cream);border-radius:var(--r);padding:14px 16px;border:1px solid var(--border)}
+.vet-vlabel{font-size:11px;color:var(--ink3);margin-bottom:5px}
+.vet-vval{font-size:26px;font-weight:800;line-height:1}
+.vet-vval.danger{color:var(--red)}
+.vet-vunit{font-size:12px;color:var(--ink3);margin-top:2px}
+.vet-vflag{font-size:11px;font-weight:700;color:var(--red);margin-top:5px}
+.vet-finding{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;border-radius:var(--r);margin-bottom:8px;border:1px solid var(--border)}
+.vet-finding.critical{border-color:var(--red-mid);background:var(--red-bg)}
+.vet-finding.warning{border-color:var(--amber-mid);background:var(--amber-bg)}
+.vet-fico{font-size:16px;flex-shrink:0;margin-top:1px}
+.vet-ftext{font-size:13px;line-height:1.55}
+.vet-ftext strong{display:block;margin-bottom:2px;font-weight:700}
+.vet-print-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity .15s}
+.vet-print-btn:hover{opacity:.88}
+.vet-note{font-size:11px;color:var(--ink4);text-align:center;margin-top:10px;line-height:1.5}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  .charts-grid{grid-template-columns:1fr}
+  .hero{grid-template-columns:1fr;gap:20px}
+  .score-wrap{margin:0 auto}
+  .vitals{grid-template-columns:1fr 1fr}
+  .vet-vitals{grid-template-columns:1fr 1fr}
+  .nav-tabs{display:none}
+  .mobile-tabs{display:flex}
+}
+@media(max-width:540px){
+  .main{padding:16px 14px 60px}
+  .vitals{grid-template-columns:1fr}
+  .vet-vitals{grid-template-columns:1fr}
+  .hero{padding:18px}
+  .demo-row{flex-direction:column;align-items:flex-start}
+  .vet-top{padding:20px}
+  .vet-body{padding:20px}
+}
+
+/* MOBILE NAV */
+.mobile-tabs{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(253,250,245,0.96);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:8px 16px 12px;gap:4px;z-index:200}
+.mobile-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:var(--r);border:none;background:transparent;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:var(--ink3);cursor:pointer;transition:all .15s}
+.mobile-tab.active{color:var(--ink);background:var(--cream2)}
+.mobile-tab-ico{font-size:18px}
+@media(min-width:861px){.mobile-tabs{display:none!important}}
+</style>
 </head>
 <body>
-  <div id="app">
-    <!-- NAV -->
-    <nav class="nav" id="topNav">
-      <div class="nav-left">
-        <div class="nav-logo">
-          <span class="logo-paw">🐾</span>
-          <span class="logo-text">PawSense</span>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">🐾</div>
+    <span class="nav-logo-text">PawSense</span>
+  </a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-view="dashboard">Dashboard</button>
+    <button class="nav-tab" data-view="timeline">Timeline</button>
+    <button class="nav-tab" data-view="insights">Insights</button>
+    <button class="nav-tab" data-view="vet">Vet Report</button>
+  </div>
+  <div class="nav-dog">
+    <div class="nav-avatar">🐕</div>
+    <div>
+      <div class="nav-dog-name">Mochi</div>
+      <div class="nav-dog-breed">Golden Retriever · 4 yrs</div>
+    </div>
+    <div class="alert-pill" id="alertPill">⚠ Alert</div>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+
+    <div class="alert-banner" id="alertBanner">
+      <div class="alert-inner">
+        <div class="alert-icon" id="alertIcon">🚨</div>
+        <div class="alert-text">
+          <div class="alert-title danger" id="alertTitle">Elevated Heart Rate Detected</div>
+          <div class="alert-desc" id="alertDesc">Mochi's resting heart rate has been 30% above baseline for 2+ hours. This may indicate early illness.</div>
+        </div>
+        <div class="alert-cta">
+          <button class="btn btn-dark" onclick="switchView('vet')">View Vet Report →</button>
+          <button class="btn btn-outline" id="dismissBtn" onclick="document.getElementById('alertBanner').style.display='none'">Dismiss</button>
         </div>
       </div>
-      <div class="nav-center">
-        <div class="nav-tabs">
-          <button class="nav-tab active" data-view="dashboard">Dashboard</button>
-          <button class="nav-tab" data-view="timeline">Timeline</button>
-          <button class="nav-tab" data-view="insights">Insights</button>
-          <button class="nav-tab" data-view="vet">Vet Report</button>
+    </div>
+
+    <section class="hero">
+      <div class="score-wrap">
+        <svg class="score-svg" viewBox="0 0 130 130" aria-hidden="true">
+          <circle cx="65" cy="65" r="52" fill="none" stroke="#EDE5D8" stroke-width="11"/>
+          <circle id="scoreArc" cx="65" cy="65" r="52" fill="none" stroke="#2D7D52" stroke-width="11"
+            stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="65.3"
+            transform="rotate(-90 65 65)"/>
+        </svg>
+        <div class="score-label">
+          <div class="score-num" id="scoreNum">80</div>
+          <div class="score-word" id="scoreWord">Great</div>
         </div>
       </div>
-      <div class="nav-right">
-        <div class="dog-switcher">
-          <div class="dog-avatar" id="navAvatar">🐕</div>
-          <div class="dog-info">
-            <div class="dog-name" id="navDogName">Mochi</div>
-            <div class="dog-breed" id="navDogBreed">Golden Retriever · 4 yrs</div>
+
+      <div class="hero-body">
+        <div class="hero-greeting" id="heroGreeting">Mochi is doing great today! 🎉</div>
+        <div class="hero-sub" id="heroSub">All vitals within normal range · Last synced 3 min ago</div>
+
+        <div class="vitals">
+          <div class="vital" id="v-hr">
+            <div class="vital-ico">❤️</div>
+            <div>
+              <div class="vital-val" id="vHR">88 bpm</div>
+              <div class="vital-name">Heart Rate</div>
+              <div class="vital-badge badge-ok" id="bHR">Normal</div>
+            </div>
           </div>
-          <div class="alert-badge" id="alertBadge" style="display:none">⚠ Alert</div>
+          <div class="vital" id="v-temp">
+            <div class="vital-ico">🌡️</div>
+            <div>
+              <div class="vital-val" id="vTemp">38.5°C</div>
+              <div class="vital-name">Temperature</div>
+              <div class="vital-badge badge-ok" id="bTemp">Normal</div>
+            </div>
+          </div>
+          <div class="vital" id="v-act">
+            <div class="vital-ico">⚡</div>
+            <div>
+              <div class="vital-val" id="vAct">6,240 steps</div>
+              <div class="vital-name">Activity</div>
+              <div class="vital-badge badge-ok" id="bAct">Active</div>
+            </div>
+          </div>
+          <div class="vital" id="v-sleep">
+            <div class="vital-ico">😴</div>
+            <div>
+              <div class="vital-val" id="vSleep">7.5 hrs</div>
+              <div class="vital-name">Sleep</div>
+              <div class="vital-badge badge-ok" id="bSleep">Good</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-row">
+          <span class="demo-label">Demo:</span>
+          <div class="demo-btns">
+            <button class="demo-btn active" data-scenario="healthy">Healthy Day</button>
+            <button class="demo-btn" data-scenario="mild">Mild Concern</button>
+            <button class="demo-btn" data-scenario="critical">Critical Alert</button>
+          </div>
         </div>
       </div>
-    </nav>
+    </section>
 
-    <!-- VIEWS -->
-    <main class="main-content">
-
-      <!-- DASHBOARD VIEW -->
-      <div class="view active" id="view-dashboard">
-        <!-- ALERT BANNER -->
-        <div class="alert-banner" id="alertBanner" style="display:none">
-          <div class="alert-inner">
-            <div class="alert-icon-wrap">🚨</div>
-            <div class="alert-text">
-              <div class="alert-title" id="alertTitle">Elevated Heart Rate Detected</div>
-              <div class="alert-desc" id="alertDesc">Mochi's resting heart rate has been 30% above baseline for 2+ hours. This may indicate early illness.</div>
-            </div>
-            <div class="alert-cta">
-              <button class="btn-alert" onclick="switchView('vet')">View Vet Report →</button>
-              <button class="btn-dismiss" id="dismissAlert">Dismiss</button>
-            </div>
+    <section class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-title">Heart Rate · 7-Day Trend</div>
+          <div class="chart-legend">
+            <span class="leg-dot" style="background:#2D7D52"></span> Mochi
+            <span class="leg-dot" style="background:#ccc;margin-left:10px"></span> Baseline
           </div>
         </div>
-
-        <!-- HERO SCORE -->
-        <section class="hero-section">
-          <div class="hero-score-wrap">
-            <svg class="score-ring" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <circle cx="70" cy="70" r="56" fill="none" stroke="#F0EDE8" stroke-width="12"/>
-              <circle id="scoreCircle" cx="70" cy="70" r="56" fill="none"
-                stroke="#3B9E5A" stroke-width="12" stroke-linecap="round"
-                stroke-dasharray="351.9" stroke-dashoffset="70.4"
-                transform="rotate(-90 70 70)"/>
-            </svg>
-            <div class="score-center">
-              <div class="score-number" id="scoreNumber">80</div>
-              <div class="score-word" id="scoreWord">Great</div>
-            </div>
-          </div>
-
-          <div class="hero-info">
-            <div class="hero-greeting" id="heroGreeting">Mochi is doing great today! 🎉</div>
-            <div class="hero-subtitle" id="heroSubtitle">All vitals within normal range · Last synced 3 min ago</div>
-
-            <div class="vitals-grid">
-              <div class="vital-item" id="vital-hr">
-                <div class="vital-icon">❤️</div>
-                <div class="vital-data">
-                  <div class="vital-val" id="vitalHR">88 bpm</div>
-                  <div class="vital-label">Heart Rate</div>
-                  <div class="vital-status ok" id="statusHR">Normal</div>
-                </div>
-              </div>
-              <div class="vital-item" id="vital-temp">
-                <div class="vital-icon">🌡️</div>
-                <div class="vital-data">
-                  <div class="vital-val" id="vitalTemp">38.5°C</div>
-                  <div class="vital-label">Temperature</div>
-                  <div class="vital-status ok" id="statusTemp">Normal</div>
-                </div>
-              </div>
-              <div class="vital-item" id="vital-act">
-                <div class="vital-icon">⚡</div>
-                <div class="vital-data">
-                  <div class="vital-val" id="vitalAct">6,240 steps</div>
-                  <div class="vital-label">Activity</div>
-                  <div class="vital-status ok" id="statusAct">Active</div>
-                </div>
-              </div>
-              <div class="vital-item" id="vital-sleep">
-                <div class="vital-icon">😴</div>
-                <div class="vital-data">
-                  <div class="vital-val" id="vitalSleep">7.2 hrs</div>
-                  <div class="vital-label">Sleep</div>
-                  <div class="vital-status ok" id="statusSleep">Good</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- SCENARIO DEMO SWITCHER -->
-            <div class="demo-switcher">
-              <span class="demo-label">Demo scenario:</span>
-              <div class="demo-btns">
-                <button class="demo-btn active" data-scenario="healthy">Healthy Day</button>
-                <button class="demo-btn" data-scenario="mild">Mild Concern</button>
-                <button class="demo-btn" data-scenario="critical">Critical Alert</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CHARTS ROW -->
-        <section class="charts-section">
-          <div class="chart-card wide">
-            <div class="chart-header">
-              <div class="chart-title">Heart Rate · 7-Day Trend</div>
-              <div class="chart-legend">
-                <span class="legend-dot" style="background:#3B9E5A"></span> Mochi
-                <span class="legend-dot" style="background:#ccc; margin-left:12px"></span> Baseline (88 bpm)
-              </div>
-            </div>
-            <div class="canvas-wrap" style="height:180px">
-              <canvas id="hrTrendChart" role="img" aria-label="Heart rate over 7 days with anomaly spike on day 5"></canvas>
-            </div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <div class="chart-title">Activity Score</div>
-            </div>
-            <div class="canvas-wrap" style="height:180px">
-              <canvas id="actChart" role="img" aria-label="Daily activity scores over 7 days"></canvas>
-            </div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <div class="chart-title">Sleep Quality</div>
-            </div>
-            <div class="canvas-wrap" style="height:180px">
-              <canvas id="sleepChart" role="img" aria-label="Sleep quality scores over 7 days"></canvas>
-            </div>
-          </div>
-        </section>
-
-        <!-- TODAY'S LOG -->
-        <section class="log-section">
-          <h2 class="section-title">Today's Log</h2>
-          <div class="log-list" id="todayLog"></div>
-        </section>
-      </div>
-
-      <!-- TIMELINE VIEW -->
-      <div class="view" id="view-timeline">
-        <div class="view-header">
-          <h1 class="view-title">Health Timeline</h1>
-          <p class="view-desc">Complete history of Mochi's health events over the past 30 days</p>
+        <div class="canvas-wrap" style="height:170px">
+          <canvas id="hrChart" role="img" aria-label="Heart rate 7 day trend"></canvas>
         </div>
-        <div class="timeline-container" id="fullTimeline"></div>
       </div>
-
-      <!-- INSIGHTS VIEW -->
-      <div class="view" id="view-insights">
-        <div class="view-header">
-          <h1 class="view-title">AI Health Insights</h1>
-          <p class="view-desc">Patterns and predictions based on Mochi's biometric data</p>
+      <div class="chart-card">
+        <div class="chart-head"><div class="chart-title">Activity Score</div></div>
+        <div class="canvas-wrap" style="height:170px">
+          <canvas id="actChart" role="img" aria-label="Activity scores"></canvas>
         </div>
-        <div class="insights-grid" id="insightsGrid"></div>
       </div>
-
-      <!-- VET REPORT VIEW -->
-      <div class="view" id="view-vet">
-        <div class="view-header">
-          <h1 class="view-title">Vet Report</h1>
-          <p class="view-desc">AI-generated summary ready to share with your veterinarian</p>
+      <div class="chart-card">
+        <div class="chart-head"><div class="chart-title">Sleep Quality</div></div>
+        <div class="canvas-wrap" style="height:170px">
+          <canvas id="sleepChart" role="img" aria-label="Sleep quality scores"></canvas>
         </div>
-        <div class="vet-report" id="vetReport"></div>
       </div>
+    </section>
 
-    </main>
+    <section>
+      <h2 class="section-title">Today's Log</h2>
+      <div class="log-list" id="todayLog"></div>
+    </section>
+
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <script src="src/data.js"></script>
-  <script src="src/app.js"></script>
+  <!-- TIMELINE -->
+  <div class="view" id="view-timeline">
+    <div class="view-head">
+      <h1 class="view-title">Health Timeline</h1>
+      <p class="view-desc">Complete 30-day history of Mochi's health events</p>
+    </div>
+    <div id="fullTimeline"></div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="view" id="view-insights">
+    <div class="view-head">
+      <h1 class="view-title">AI Health Insights</h1>
+      <p class="view-desc">Patterns and predictions from Mochi's biometric data</p>
+    </div>
+    <div class="insights-grid" id="insightsGrid"></div>
+  </div>
+
+  <!-- VET REPORT -->
+  <div class="view" id="view-vet">
+    <div class="view-head">
+      <h1 class="view-title">Vet Report</h1>
+      <p class="view-desc">AI-generated clinical summary — ready to share with your vet</p>
+    </div>
+    <div class="vet-wrap" id="vetReport"></div>
+  </div>
+
+</main>
+
+<!-- MOBILE NAV -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mobile-tab active" data-view="dashboard"><span class="mobile-tab-ico">🏠</span>Home</button>
+  <button class="mobile-tab" data-view="timeline"><span class="mobile-tab-ico">📅</span>Timeline</button>
+  <button class="mobile-tab" data-view="insights"><span class="mobile-tab-ico">💡</span>Insights</button>
+  <button class="mobile-tab" data-view="vet"><span class="mobile-tab-ico">🩺</span>Vet</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ======== DATA ========
+const CHART_DATA={labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],healthy:{hr:[85,88,90,87,86,89,88],activity:[84,78,91,88,72,95,80],sleep:[88,82,90,85,79,92,86]},mild:{hr:[88,87,90,86,98,102,95],activity:[85,81,88,84,60,55,65],sleep:[88,83,89,85,68,62,70]},critical:{hr:[86,89,88,90,118,121,115],activity:[83,80,90,86,32,28,40],sleep:[86,84,91,88,45,38,52]}};
+
+const SCENARIOS={
+  healthy:{score:80,scoreColor:'#2D7D52',scoreWord:'Great',greeting:'Mochi is doing great today! 🎉',sub:'All vitals within normal range · Last synced 3 min ago',showAlert:false,bannerCls:'',vitals:{hr:{val:'88 bpm',badge:'Normal',cls:'badge-ok',wrap:''},temp:{val:'38.5°C',badge:'Normal',cls:'badge-ok',wrap:''},act:{val:'6,240 steps',badge:'Active',cls:'badge-ok',wrap:''},sleep:{val:'7.5 hrs',badge:'Good',cls:'badge-ok',wrap:''}},log:[{dot:'#2D7D52',event:'Morning walk',detail:'48 min · 3,800 steps · heart rate stable 85–92 bpm',time:'7:10 AM',tag:'ok'},{dot:'#2D7D52',event:'Post-walk meal',detail:'Appetite normal · full bowl finished in 4 minutes',time:'8:05 AM',tag:'ok'},{dot:'#2D7D52',event:'Nap detected',detail:'82 min rest · deep sleep 55 min · quality 88/100',time:'9:30 AM',tag:'ok'},{dot:'#2D7D52',event:'Play session',detail:'Fetch in backyard · 22 min · high energy, no distress',time:'12:15 PM',tag:'ok'},{dot:'#2D7D52',event:'Resting period',detail:'Heart rate 82 bpm · temperature stable · relaxed',time:'3:00 PM',tag:'ok'},{dot:'#2D7D52',event:'Evening walk',detail:'35 min · 2,440 steps · good energy throughout',time:'6:30 PM',tag:'ok'}]},
+  mild:{score:58,scoreColor:'#C17D27',scoreWord:'Watch',greeting:'Mochi may need some attention 🔍',sub:'Mild anomalies detected · Monitoring closely',showAlert:true,bannerCls:'warning',alertTitle:'Mild Elevation in Heart Rate & Reduced Activity',alertDesc:'Heart rate 14% above baseline and activity down 36% vs. daily average. Not urgent — but worth monitoring today.',alertIcon:'⚠️',vitals:{hr:{val:'102 bpm',badge:'↑ Mild',cls:'badge-warn',wrap:'warning'},temp:{val:'38.9°C',badge:'Borderline',cls:'badge-warn',wrap:'warning'},act:{val:'3,900 steps',badge:'↓ Low',cls:'badge-warn',wrap:'warning'},sleep:{val:'5.8 hrs',badge:'Restless',cls:'badge-warn',wrap:'warning'}},log:[{dot:'#2D7D52',event:'Morning walk',detail:'28 min · 2,100 steps · slightly slower than usual',time:'7:30 AM',tag:'ok'},{dot:'#C17D27',event:'Reduced appetite',detail:'Left 30% of food in bowl — unusual for Mochi',time:'8:20 AM',tag:'warning'},{dot:'#C17D27',event:'Restless nap',detail:'Multiple position changes · sleep quality 58/100',time:'10:00 AM',tag:'warning'},{dot:'#C17D27',event:'Activity drop detected',detail:'Steps 36% below daily average for this time of day',time:'12:00 PM',tag:'warning'},{dot:'#C17D27',event:'Heart rate elevated',detail:'102 bpm at rest · baseline 88 · PawSense flagging',time:'1:45 PM',tag:'warning'},{dot:'#2D7D52',event:'Lapping water',detail:'Normal hydration observed · no signs of distress',time:'3:10 PM',tag:'ok'}]},
+  critical:{score:28,scoreColor:'#C0392B',scoreWord:'Alert',greeting:'Mochi needs veterinary attention 🚨',sub:'Critical anomaly detected · Immediate action recommended',showAlert:true,bannerCls:'danger',alertTitle:'🚨 Critical: Elevated Heart Rate + Fever + Near-Zero Activity',alertDesc:'Heart rate 35% above baseline for 6+ hours, temperature 39.7°C, activity at 18% of normal. This pattern is consistent with acute illness — see a vet today.',alertIcon:'🚨',vitals:{hr:{val:'118 bpm',badge:'↑ Critical',cls:'badge-danger',wrap:'danger'},temp:{val:'39.7°C',badge:'↑ High',cls:'badge-danger',wrap:'danger'},act:{val:'1,100 steps',badge:'↓ Very Low',cls:'badge-danger',wrap:'danger'},sleep:{val:'3.2 hrs',badge:'Disrupted',cls:'badge-danger',wrap:'danger'}},log:[{dot:'#C17D27',event:'Skipped morning walk',detail:'Mochi refused to leave dog bed — first time in 3 months',time:'7:00 AM',tag:'warning'},{dot:'#C17D27',event:'Meal refused',detail:'Did not eat morning meal — appetite at 0%',time:'8:00 AM',tag:'warning'},{dot:'#C0392B',event:'Heart rate spike',detail:'118 bpm at rest · 35% above personal baseline of 88 bpm',time:'8:45 AM',tag:'danger'},{dot:'#C0392B',event:'Temperature elevated',detail:'39.7°C · above normal range (37.5–39.2°C) · fever pattern flagged',time:'10:00 AM',tag:'danger'},{dot:'#C0392B',event:'⚠ PawSense Critical Alert triggered',detail:'Multi-signal anomaly: elevated HR + fever + near-zero activity indicates urgent vet care',time:'10:04 AM',tag:'danger'},{dot:'#C0392B',event:'Elevated HR sustained 6h',detail:'118–121 bpm sustained · no improvement · no food or water consumed',time:'2:00 PM',tag:'danger'}]}
+};
+
+const TIMELINE=[{date:'Today — April 25',hasAlert:true,events:[{type:'featured',icon:'🚨',time:'10:04 AM',title:'CRITICAL ALERT: Urgent Veterinary Visit Required',desc:'Heart rate 118 bpm (35% above baseline), temperature 39.7°C, activity at 18% of normal for 6+ hours. PawSense AI detects high-confidence illness pattern — consistent with acute infection or gastroenteritis. Immediate vet visit recommended.',meta:'AI confidence: 94% · Anomaly score: 9.2/10'},{type:'alert',icon:'🌡️',time:'10:00 AM',title:'Fever Pattern Detected',desc:'Temperature trending from 38.5°C baseline to 39.7°C over 5 hours. Exceeds breed-normal ceiling of 39.2°C.',meta:'Duration: 5 hours sustained'},{type:'alert',icon:'❤️',time:'8:45 AM',title:'Heart Rate Spike — 118 bpm',desc:'Resting heart rate jumped from baseline 88 bpm to 118 bpm. Elevated for 2+ hours before alert threshold reached.',meta:'Deviation: +35% above personal baseline'},{type:'warning',icon:'🦴',time:'8:00 AM',title:'Meal Refused',desc:'Mochi did not eat morning meal. Combined with prior warning signals, appetite loss escalated anomaly score.',meta:''},{type:'warning',icon:'🛏️',time:'7:00 AM',title:'Refused Morning Walk',desc:'First refusal of walk in 90+ days. Lethargy detected via accelerometer — near-zero movement for 3 hours overnight.',meta:'Baseline walk streak broken'}]},{date:'Yesterday — April 24',hasAlert:false,events:[{type:'warning',icon:'😴',time:'11:30 PM',title:'Restless Sleep — Quality 42/100',desc:'Unusual movement patterns overnight. 14 position changes vs. average 3. Deep sleep phases reduced by 60%.',meta:'Retrospective: likely early symptom onset'},{type:'warning',icon:'⚡',time:'5:00 PM',title:'Activity 28% Below Daily Average',desc:'Evening walk completed but pace 40% slower. Mochi did not engage in usual post-walk play.',meta:''},{type:'ok',icon:'🥣',time:'12:00 PM',title:'Lunch — 75% Consumed',desc:'Slight reduction in appetite noted but within acceptable range. No alert triggered.',meta:''},{type:'ok',icon:'🚶',time:'7:20 AM',title:'Morning Walk — 35 min',desc:'Normal walk, slightly shorter than average 48 min. Vitals stable during activity.',meta:''}]},{date:'April 23',hasAlert:false,events:[{type:'ok',icon:'✅',time:'All day',title:'Excellent Health Day — Score 91/100',desc:'Best score of the week. All vitals nominal, 7,400 steps, 8.1 hrs quality sleep. Baseline confirmed stable.',meta:''},{type:'info',icon:'📊',time:'8:00 PM',title:'Weekly Baseline Recalibrated',desc:"PawSense AI updated Mochi's personal baseline models with 30 days of new data. Heart rate baseline confirmed at 88 bpm.",meta:''}]},{date:'April 22',hasAlert:false,events:[{type:'ok',icon:'🏃',time:'4:00 PM',title:'High Activity Day — 9,200 Steps',desc:'Long run with owner at Riverside Park. Heart rate peaked at 168 bpm during exertion (healthy). Full recovery within 18 minutes.',meta:'Exercise HR: expected and normal'},{type:'ok',icon:'😴',time:'9:00 PM',title:'Deep Sleep — 8.3 hrs',desc:'Post-exercise recovery sleep. Quality score 94/100. All biometrics stable overnight.',meta:''}]},{date:'April 19',hasAlert:true,events:[{type:'warning',icon:'⚠️',time:'2:30 PM',title:'Mild Alert: Elevated HR After Heat Exposure',desc:'Heart rate reached 108 bpm after afternoon nap in direct sun. Owner moved Mochi indoors and HR normalized within 30 min.',meta:'Resolved without vet visit · Duration: 32 min'},{type:'resolved',icon:'✅',time:'3:02 PM',title:'Alert Resolved — HR Normalized',desc:'Heart rate returned to 89 bpm following cooling and hydration. PawSense closed the alert.',meta:''}]},{date:'April 15',hasAlert:false,events:[{type:'info',icon:'💉',time:'10:00 AM',title:'Veterinary Check-up — All Clear',desc:'Annual wellness visit. Dr. Sarah Chen confirmed excellent health. Weight 28.2 kg (ideal). Vaccinations updated. No concerns.',meta:'PawSense report shared with vet · Next visit: October 2025'},{type:'warning',icon:'❤️',time:'10:30 AM',title:'Expected HR Elevation at Vet — Auto-Flagged',desc:'Heart rate 110 bpm during visit (white coat effect). PawSense auto-tagged as vet anxiety — not anomalous.',meta:'Correctly auto-resolved by AI'}]},{date:'April 8',hasAlert:true,events:[{type:'warning',icon:'🦴',time:'7:00 AM',title:'Reduced Appetite — 2 Days Running',desc:'Mochi ate only 50% of food for 2 consecutive days. Alert triggered on day 2 per consecutive-day rule.',meta:''},{type:'info',icon:'📱',time:'9:00 AM',title:'Owner Checked In via App',desc:'Owner noted Mochi had chewed on a plastic toy the previous day. Monitored for 24h. Appetite returned to normal.',meta:'Resolved: behavioral, not illness-related'},{type:'resolved',icon:'✅',time:'April 9',title:'Appetite Returned to Normal',desc:'Full meal consumed. Alert closed. Owner note: "She found a treat under the couch and decided eating was worth it again."',meta:''}]}];
+
+const INSIGHTS=[{urgent:true,emoji:'🚨',title:'Critical Health Pattern',sub:'Immediate action required',body:"PawSense AI has detected a convergence of three independent anomaly signals — elevated heart rate, fever pattern, and near-zero activity — sustained for 6+ hours. This combination has 94% predictive accuracy for requiring veterinary intervention, based on patterns across 12,000+ similar dog health profiles.",metrics:[{n:'Heart rate elevation',v:'+35%',c:'up'},{n:'Temperature',v:'39.7°C (↑1.2°)',c:'up'},{n:'Activity level',v:'18% of normal',c:'up'},{n:'AI confidence',v:'94%',c:'up'}],action:'📅 Book Emergency Vet Visit',aCls:'primary',onClick:"switchView('vet')"},{urgent:false,emoji:'📈',title:'Heart Rate Analysis',sub:'Last 7 days',body:"Mochi's resting heart rate has been stable at 88 bpm for the past 3 months. The sudden spike to 118–121 bpm over the past 24 hours is statistically significant. Normal exertion-based elevations resolve within 18 minutes — this pattern has not resolved in 6+ hours.",metrics:[{n:'Personal baseline',v:'88 bpm',c:'ok'},{n:'Current resting HR',v:'118 bpm',c:'up'},{n:'Duration elevated',v:'6+ hours',c:'up'},{n:'Normal recovery',v:'~18 min',c:'ok'}],action:'View Full HR History',aCls:'secondary',onClick:'void(0)'},{urgent:false,emoji:'🌡️',title:'Temperature Trend',sub:'Fever pattern detected',body:'Canine normal temperature is 37.5–39.2°C. At 39.7°C, Mochi exceeds the upper bound. Temperature has risen 1.2°C over 5 hours, not attributable to exercise or heat exposure.',metrics:[{n:'Normal range',v:'37.5–39.2°C',c:'ok'},{n:'Current reading',v:'39.7°C',c:'up'},{n:'5-hour trend',v:'+1.2°C rise',c:'up'},{n:'Hydration risk',v:'Moderate',c:'warn'}],action:'Download Temperature Log',aCls:'secondary',onClick:'void(0)'},{urgent:false,emoji:'😴',title:'Sleep Pattern Disruption',sub:'Started 48 hours ago',body:"Sleep quality dropped from Mochi's average 86/100 to 38/100 over 2 nights. The disruption predates the HR alert by ~36 hours — an early signal that could enable even faster intervention.",metrics:[{n:'Average sleep quality',v:'86/100',c:'ok'},{n:'Last night quality',v:'38/100',c:'up'},{n:'Deep sleep time',v:'↓ 60%',c:'up'},{n:'Early signal lag',v:'~36 hrs',c:'warn'}],action:'View Sleep History',aCls:'secondary',onClick:'void(0)'},{urgent:false,emoji:'📋',title:'Historical Comparison',sub:'April 15 vet visit — all clear',body:"At Mochi's annual check-up 10 days ago, all biometrics were within ideal ranges and Dr. Chen confirmed excellent health. This confirms the current anomaly is acute — not a pre-existing condition.",metrics:[{n:'Days since last vet visit',v:'10 days',c:'warn'},{n:'Vet assessment Apr 15',v:'All clear',c:'ok'},{n:'Anomaly onset',v:'~36 hrs ago',c:'warn'},{n:'Vaccination status',v:'Current',c:'ok'}],action:'View Apr 15 Report',aCls:'secondary',onClick:'void(0)'},{urgent:false,emoji:'🏃',title:'Activity Intelligence',sub:'Exercise & recovery patterns',body:"Mochi's activity baseline is 6,100 steps/day with weekly peaks on Saturday (avg 9,200). The current 1,100 steps is an 82% drop from baseline — second-lowest day on record.",metrics:[{n:'Daily step baseline',v:'6,100',c:'ok'},{n:'Steps today',v:'1,100 (−82%)',c:'up'},{n:'Best day this month',v:'9,200 (Apr 22)',c:'ok'},{n:'Walk streak',v:'Broken today',c:'up'}],action:'View Activity Log',aCls:'secondary',onClick:'void(0)'}];
+
+const VET_REPORT={date:'April 25, 2025 — 10:04 AM',urgency:'URGENT — Same-Day Visit Recommended',vitals:[{label:'Heart Rate',val:'118',unit:'bpm',danger:true,flag:'↑ 35% above baseline'},{label:'Temperature',val:'39.7',unit:'°C',danger:true,flag:'↑ Exceeds normal range'},{label:'Activity',val:'18%',unit:'of normal',danger:true,flag:'↓ Near-zero movement'},{label:'Sleep Quality',val:'38',unit:'/100',danger:true,flag:'↓ 56 pts below average'}],findings:[{type:'critical',icon:'🔴',title:'Sustained Tachycardia',desc:"Resting heart rate of 118–121 bpm for 6+ consecutive hours. Mochi's established personal baseline is 88 bpm (confirmed over 90 days of data). Exertion-based elevation ruled out — Mochi has been stationary."},{type:'critical',icon:'🔴',title:'Pyrexia (Fever)',desc:"Temperature of 39.7°C, exceeding canine normal ceiling of 39.2°C. Temperature has risen 1.2°C over 5 hours. Not attributable to exercise or environmental heat."},{type:'critical',icon:'🔴',title:'Anorexia & Lethargy',desc:'Complete refusal of food and water for 8+ hours. Walk refused for first time in 90+ days. Near-zero voluntary movement since 6:00 AM.'},{type:'warning',icon:'🟡',title:'Prodromal Signs (48h Prior)',desc:'Early signals 36–48 hours before main alert: sleep quality dropped from 86/100 to 58/100, appetite reduced to 75%, evening pace slowed by 40%.'}],differentials:'Acute infection (bacterial/viral) · Gastroenteritis · Pancreatitis · Ingested foreign body · Tick-borne illness (Lyme, Ehrlichia)',history:'Annual wellness visit April 15, 2025 — Dr. Sarah Chen — all clear. Vaccinations current. Weight 28.2 kg. No prior serious illness episodes. Mild heat-related HR elevation April 19 — resolved spontaneously.'};
+
+// ======== CHARTS ========
+let hrC, actC, sleepC;
+function initCharts(){
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#78716C'}},x:{grid:{display:false},ticks:{font:{size:11},color:'#78716C'}}}};
+  hrC=new Chart(document.getElementById('hrChart'),{type:'line',data:buildHR(CHART_DATA.healthy.hr,'healthy'),options:{...base,scales:{...base.scales,y:{...base.scales.y,min:60,max:130}}}});
+  actC=new Chart(document.getElementById('actChart'),{type:'bar',data:buildBar(CHART_DATA.healthy.activity,'#2D7D52'),options:{...base,scales:{...base.scales,y:{...base.scales.y,min:0,max:100}}}});
+  sleepC=new Chart(document.getElementById('sleepChart'),{type:'bar',data:buildBar(CHART_DATA.healthy.sleep,'#1A6FA8'),options:{...base,scales:{...base.scales,y:{...base.scales.y,min:0,max:100}}}});
+}
+function buildHR(data,sc){
+  const col=sc==='critical'?'#C0392B':sc==='mild'?'#C17D27':'#2D7D52';
+  const ptCol=data.map((_,i)=>sc!=='healthy'&&i>=4?'#C0392B':col);
+  return{labels:CHART_DATA.labels,datasets:[{label:'Heart Rate',data,borderColor:col,backgroundColor:col+'18',borderWidth:2.5,tension:.4,fill:true,pointRadius:data.map((_,i)=>sc!=='healthy'&&i>=4?5:3),pointBackgroundColor:ptCol},{label:'Baseline',data:new Array(7).fill(88),borderColor:'rgba(0,0,0,0.15)',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false,tension:0}]};
+}
+function buildBar(data,col){
+  return{labels:CHART_DATA.labels,datasets:[{data,backgroundColor:data.map((v,i)=>i>=4?(v<50?'#C0392B44':'#C17D2744'):col+'77'),borderColor:data.map((v,i)=>i>=4?(v<50?'#C0392B':'#C17D27'):col),borderWidth:1.5,borderRadius:5}]};
+}
+function updateCharts(sc){
+  const d=CHART_DATA[sc];
+  hrC.data=buildHR(d.hr,sc);hrC.update();
+  actC.data=buildBar(d.activity,'#2D7D52');actC.update();
+  sleepC.data=buildBar(d.sleep,'#1A6FA8');sleepC.update();
+}
+
+// ======== SCENARIO ========
+function applyScenario(sc){
+  const s=SCENARIOS[sc];
+  // Score
+  const circ=2*Math.PI*52;
+  document.getElementById('scoreArc').style.strokeDashoffset=(circ*(1-s.score/100)).toFixed(1);
+  document.getElementById('scoreArc').style.stroke=s.scoreColor;
+  document.getElementById('scoreNum').textContent=s.score;
+  document.getElementById('scoreNum').style.color=s.scoreColor;
+  document.getElementById('scoreWord').textContent=s.scoreWord;
+  // Hero
+  document.getElementById('heroGreeting').textContent=s.greeting;
+  document.getElementById('heroSub').textContent=s.sub;
+  // Vitals
+  [['hr','HR'],['temp','Temp'],['act','Act'],['sleep','Sleep']].forEach(([k,id])=>{
+    const v=s.vitals[k];
+    document.getElementById('v'+id).textContent=v.val;
+    const b=document.getElementById('b'+id);
+    b.textContent=v.badge;b.className='vital-badge '+v.cls;
+    const w=document.getElementById('v-'+k);
+    w.className='vital'+(v.wrap?' '+v.wrap:'');
+  });
+  // Alert
+  const banner=document.getElementById('alertBanner');
+  if(s.showAlert){
+    banner.style.display='block';
+    banner.className='alert-banner '+s.bannerCls;
+    document.getElementById('alertIcon').textContent=s.alertIcon||'🚨';
+    const t=document.getElementById('alertTitle');
+    t.textContent=s.alertTitle;t.className='alert-title '+(s.bannerCls||'danger');
+    document.getElementById('alertDesc').textContent=s.alertDesc;
+    const ob=document.getElementById('dismissBtn');
+    ob.className='btn btn-outline '+(s.bannerCls==='warning'?'amber':'');
+    document.getElementById('alertPill').style.display='flex';
+  } else {
+    banner.style.display='none';
+    document.getElementById('alertPill').style.display='none';
+  }
+  // Charts & log
+  updateCharts(sc);
+  renderLog(s.log);
+}
+
+// ======== LOG ========
+function renderLog(items){
+  document.getElementById('todayLog').innerHTML=items.map((item,i)=>{
+    const tagMap={ok:'badge-ok',warning:'badge-warn',danger:'badge-danger'};
+    const tagLabel={ok:'Normal',warning:'Watch',danger:'Alert'};
+    return`<div class="log-item">
+      <div class="log-dot-col">
+        <div class="log-dot" style="background:${item.dot}"></div>
+        ${i<items.length-1?'<div class="log-line"></div>':''}
+      </div>
+      <div class="log-text">
+        <div class="log-event">${item.event} <span class="log-tag ${tagMap[item.tag]}">${tagLabel[item.tag]}</span></div>
+        <div class="log-detail">${item.detail}</div>
+      </div>
+      <div class="log-time">${item.time}</div>
+    </div>`;
+  }).join('');
+}
+
+// ======== TIMELINE ========
+function renderTimeline(){
+  document.getElementById('fullTimeline').innerHTML=TIMELINE.map(day=>`
+    <div class="tl-day">
+      <div class="tl-day-head">${day.date}<span class="tl-day-badge${day.hasAlert?' alert':''}">${day.hasAlert?'⚠ Alert':'No alerts'}</span></div>
+      <div class="tl-events">${day.events.map(ev=>`
+        <div class="tl-event ${ev.type}">
+          <div class="tl-ico">${ev.icon}</div>
+          <div class="tl-body">
+            <div class="tl-etitle">${ev.title}</div>
+            <div class="tl-edesc">${ev.desc}</div>
+            ${ev.meta?`<div class="tl-meta">${ev.meta}</div>`:''}
+          </div>
+          <div class="tl-time">${ev.time}</div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ======== INSIGHTS ========
+function renderInsights(){
+  document.getElementById('insightsGrid').innerHTML=INSIGHTS.map(ins=>`
+    <div class="insight-card${ins.urgent?' urgent':''}">
+      <div class="ins-head">
+        <div class="ins-emoji">${ins.emoji}</div>
+        <div><div class="ins-title">${ins.title}</div><div class="ins-sub">${ins.sub}</div></div>
+      </div>
+      <div class="ins-body">${ins.body}</div>
+      ${ins.metrics.map(m=>`<div class="ins-metric"><span class="ins-mname">${m.n}</span><span class="ins-mval ${m.c}">${m.v}</span></div>`).join('')}
+      <button class="ins-action ${ins.aCls}" onclick="${ins.onClick}">${ins.action}</button>
+    </div>`).join('');
+}
+
+// ======== VET REPORT ========
+function renderVet(){
+  const r=VET_REPORT;
+  document.getElementById('vetReport').innerHTML=`
+    <div class="vet-top">
+      <div>
+        <div class="vet-top-title">🐾 PawSense Health Report</div>
+        <div class="vet-top-sub">Patient: Mochi · Golden Retriever · 4 yrs · 28 kg</div>
+      </div>
+      <div class="vet-top-right">
+        <div class="vet-top-date">Generated: ${r.date}</div>
+        <span class="vet-urgency-pill">${r.urgency}</span>
+      </div>
+    </div>
+    <div class="vet-body">
+      <div class="vet-sec">
+        <div class="vet-sec-title">Current Vitals</div>
+        <div class="vet-vitals">${r.vitals.map(v=>`
+          <div class="vet-vital">
+            <div class="vet-vlabel">${v.label}</div>
+            <div class="vet-vval${v.danger?' danger':''}">${v.val}</div>
+            <div class="vet-vunit">${v.unit}</div>
+            ${v.flag?`<div class="vet-vflag">${v.flag}</div>`:''}
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="vet-sec">
+        <div class="vet-sec-title">Clinical Findings</div>
+        ${r.findings.map(f=>`
+          <div class="vet-finding ${f.type}">
+            <div class="vet-fico">${f.icon}</div>
+            <div class="vet-ftext"><strong>${f.title}</strong>${f.desc}</div>
+          </div>`).join('')}
+      </div>
+      <div class="vet-sec">
+        <div class="vet-sec-title">Differential Diagnoses</div>
+        <p style="font-size:13px;color:var(--ink2);line-height:1.7">${r.differentials}</p>
+      </div>
+      <div class="vet-sec">
+        <div class="vet-sec-title">Medical History</div>
+        <p style="font-size:13px;color:var(--ink2);line-height:1.7">${r.history}</p>
+      </div>
+      <div class="vet-sec" style="border:none;padding:0">
+        <button class="vet-print-btn" onclick="window.print()">🖨️ Print / Save PDF for Vet</button>
+        <p class="vet-note">Generated by PawSense AI · For informational purposes only · Not a substitute for professional veterinary diagnosis</p>
+      </div>
+    </div>`;
+}
+
+// ======== NAV ========
+function switchView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab,.mobile-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('[data-view="'+id+'"]').forEach(t=>t.classList.add('active'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ======== INIT ========
+document.addEventListener('DOMContentLoaded',()=>{
+  initCharts();
+  applyScenario('healthy');
+  renderTimeline();
+  renderInsights();
+  renderVet();
+  document.querySelectorAll('.nav-tab,.mobile-tab').forEach(t=>{
+    t.addEventListener('click',()=>switchView(t.dataset.view));
+  });
+  document.querySelectorAll('.demo-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.demo-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      applyScenario(b.dataset.scenario);
+    });
+  });
+});
+</script>
 </body>
 </html>
